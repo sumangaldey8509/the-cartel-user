@@ -1,554 +1,436 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useAppSelector } from "@/store/hooks/hooks";
-import LandingComponent from "@/components/advertisers/LandingComponent";
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    BarChart,
-    Bar,
-    AreaChart,
-    Area,
-    Cell,
-    PieChart,
-    Pie,
-} from "recharts";
-import {
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
-    MousePointerClick,
-    Eye,
-    Percent,
+    Rocket,
     Target,
-    Calendar,
-    ArrowUpRight,
-    ArrowDownRight,
-    Info,
-    Activity,
-    Zap,
-    AlertCircle,
+    CheckCircle,
+    Shield,
+    Megaphone,
+    Users2,
+    ChartBar,
+    Lightbulb,
+    Store,
+    Mail,
+    Sparkles,
+    ArrowRight,
 } from "lucide-react";
 
-// TYPES
-type Campaign = {
-    id: string;
-    name: string;
-    advertiser: string;
-    impressions: number;
-    clicks: number;
-    spend: number;
-    conversions?: number;
-    revenue?: number;
-    status?: "active" | "paused" | "completed";
-};
+export default function AdvertiseWithUs() {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-const campaigns: Campaign[] = [
-    {
-        id: "1",
-        name: "Campaign A",
-        advertiser: "Sam",
-        impressions: 120000,
-        clicks: 3200,
-        spend: 12000,
-        conversions: 128,
-        revenue: 25600,
-        status: "active",
-    },
-    {
-        id: "2",
-        name: "Campaign B",
-        advertiser: "Sam",
-        impressions: 80000,
-        clicks: 2100,
-        spend: 8000,
-        conversions: 63,
-        revenue: 12600,
-        status: "active",
-    },
-    {
-        id: "3",
-        name: "Campaign C",
-        advertiser: "Sam",
-        impressions: 50000,
-        clicks: 1500,
-        spend: 6000,
-        conversions: 45,
-        revenue: 9000,
-        status: "paused",
-    },
-];
+    // Animated connections background (using theme colors)
+    useEffect(() => {
+        if (!containerRef.current) return;
 
-const filters = ["Today", "Yesterday", "7 Days", "3 Months", "1 Year"];
+        const createConnection = () => {
+            const connection = document.createElement("div");
+            connection.className =
+                "absolute pointer-events-none bg-gradient-to-r from-transparent via-text-primary/20 to-transparent";
 
-// Weekly trend data
-const weeklyTrendData = [
-    { name: "Mon", clicks: 400, impressions: 2400, conversions: 16 },
-    { name: "Tue", clicks: 380, impressions: 2200, conversions: 15 },
-    { name: "Wed", clicks: 520, impressions: 2900, conversions: 21 },
-    { name: "Thu", clicks: 450, impressions: 2600, conversions: 18 },
-    { name: "Fri", clicks: 610, impressions: 3400, conversions: 24 },
-    { name: "Sat", clicks: 320, impressions: 1900, conversions: 12 },
-    { name: "Sun", clicks: 290, impressions: 1700, conversions: 10 },
-];
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 100;
+            const endX = Math.random() * 100;
+            const endY = Math.random() * 100;
 
-// Device distribution data
-const deviceData = [
-    { name: "Mobile", value: 58, color: "#f59e0b" },
-    { name: "Desktop", value: 32, color: "#3b82f6" },
-    { name: "Tablet", value: 10, color: "#8b5cf6" },
-];
+            const duration = 4 + Math.random() * 6;
+            const width = Math.sqrt(
+                Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
+            );
 
-// Top performing ads (dummy)
-const topAds = [
-    { headline: "Summer Sale - 50% Off", clicks: 1250, ctr: 3.2 },
-    { headline: "New Collection Launch", clicks: 980, ctr: 2.8 },
-    { headline: "Limited Time Offer", clicks: 740, ctr: 2.4 },
-];
+            connection.style.left = `${startX}%`;
+            connection.style.top = `${startY}%`;
+            connection.style.width = `${width}vw`;
+            connection.style.height = "2px";
+            connection.style.transformOrigin = "left center";
+            connection.style.transform = `rotate(${Math.atan2(
+                endY - startY,
+                endX - startX
+            )}rad)`;
+            connection.style.animation = `pulseConnection ${duration}s ease-in-out infinite`;
+            connection.style.opacity = "0.1";
 
-export default function AdvertiserDashboard() {
-    const authedUser = useAppSelector((store) => store.auth.user);
-    const [activeFilter, setActiveFilter] = useState<string>("7 Days");
-    const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
+            containerRef.current?.appendChild(connection);
 
-    if (!authedUser) return <LandingComponent />;
-
-    const userCampaigns = useMemo(() => campaigns, []);
-
-    const stats = useMemo(() => {
-        const totalSpend = userCampaigns.reduce((a, c) => a + c.spend, 0);
-        const totalImpressions = userCampaigns.reduce((a, c) => a + c.impressions, 0);
-        const totalClicks = userCampaigns.reduce((a, c) => a + c.clicks, 0);
-        const totalConversions = userCampaigns.reduce((a, c) => a + (c.conversions || 0), 0);
-        const totalRevenue = userCampaigns.reduce((a, c) => a + (c.revenue || 0), 0);
-
-        const ctr = totalImpressions ? (totalClicks / totalImpressions) * 100 : 0;
-        const cpc = totalClicks ? totalSpend / totalClicks : 0;
-        const ecpm = totalImpressions ? (totalSpend / totalImpressions) * 1000 : 0;
-        const conversionRate = totalClicks ? (totalConversions / totalClicks) * 100 : 0;
-        const avgCpa = totalConversions ? totalSpend / totalConversions : 0;
-        const roas = totalSpend ? (totalRevenue / totalSpend) * 100 : 0;
-        const roi = totalSpend ? ((totalRevenue - totalSpend) / totalSpend) * 100 : 0;
-
-        return {
-            totalSpend,
-            totalImpressions,
-            totalClicks,
-            totalConversions,
-            totalRevenue,
-            ctr,
-            cpc,
-            ecpm,
-            conversionRate,
-            avgCpa,
-            roas,
-            roi,
+            setTimeout(() => {
+                connection.remove();
+            }, duration * 1000);
         };
-    }, [userCampaigns]);
 
-    // Insight messages based on stats
-    const insights = useMemo(() => {
-        const insightsList = [];
-        if (stats.ctr > 2.5) {
-            insightsList.push({ icon: TrendingUp, text: "CTR is 23% above industry average", positive: true });
-        } else {
-            insightsList.push({ icon: TrendingDown, text: "CTR is below target. Consider A/B testing creatives.", positive: false });
-        }
-        if (stats.roas > 200) {
-            insightsList.push({ icon: DollarSign, text: `Great ROAS at ${stats.roas.toFixed(0)}% – keep scaling`, positive: true });
-        } else if (stats.roas > 150) {
-            insightsList.push({ icon: DollarSign, text: `Healthy ROAS: ${stats.roas.toFixed(0)}%`, positive: true });
-        } else {
-            insightsList.push({ icon: AlertCircle, text: `ROAS is ${stats.roas.toFixed(0)}% – optimize underperforming ads`, positive: false });
-        }
-        if (stats.conversionRate > 5) {
-            insightsList.push({ icon: Target, text: "Conversion rate is excellent! Target similar audiences.", positive: true });
-        }
-        return insightsList;
-    }, [stats]);
+        for (let i = 0; i < 20; i++) createConnection();
 
-    const formatNumber = (num: number) => {
-        if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-        if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-        return num.toString();
-    };
+        const interval = setInterval(() => {
+            if (document.visibilityState === "visible") createConnection();
+        }, 2000);
 
-    // Metric card component with tooltip (themed)
-    const MetricCard = ({ title, value, icon: Icon, trend, tooltip, color = "amber" }: any) => {
-        const trendValue = trend?.value;
-        const isPositive = trendValue && trendValue > 0;
-        return (
-            <div
-                className="group relative rounded-xl border p-4 transition-all hover:shadow-md cursor-help bg-secondary/40"
-                style={{
+        return () => clearInterval(interval);
+    }, []);
 
-                    borderColor: "rgba(0,0,0,0.1)",
-                    color: "var(--text-primary)",
-                }}
-                onMouseEnter={() => setHoveredMetric(title)}
-                onMouseLeave={() => setHoveredMetric(null)}
-            >
-                <div className="flex items-start justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-wider opacity-60">{title}</p>
-                        <p className="text-2xl font-bold mt-1" style={{ color: "var(--text-primary)" }}>
-                            {value}
-                        </p>
-                        {trend && (
-                            <div className={`flex items-center gap-1 mt-2 text-xs ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                <span>{Math.abs(trendValue)}%</span>
-                                <span className="opacity-60">vs last period</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className={`p-2 rounded-lg bg-${color}-100 text-${color}-600`}>
-                        <Icon className="w-5 h-5" />
-                    </div>
-                </div>
-                {hoveredMetric === title && tooltip && (
-                    <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap shadow-lg">
-                        {tooltip}
-                    </div>
-                )}
-            </div>
-        );
-    };
+    const features = [
+        {
+            icon: <Target className="w-5 h-5" />,
+            title: "Targeted Industry Audience",
+            description:
+                "Reach traders, investors and Web3 users actively searching for new projects.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+        {
+            icon: <Megaphone className="w-5 h-5" />,
+            title: "Multiple Promotion Formats",
+            description:
+                "From sponsored articles to banners and influencer campaigns.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+        {
+            icon: <Users2 className="w-5 h-5" />,
+            title: "Verified Publisher Marketplace",
+            description:
+                "Browse real publisher profiles and choose the right partners.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+        {
+            icon: <ChartBar className="w-5 h-5" />,
+            title: "Performance Driven Campaigns",
+            description:
+                "Launch scalable marketing campaigns across media outlets.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+        {
+            icon: <Lightbulb className="w-5 h-5" />,
+            title: "Growth Strategies",
+            description: "Marketing strategies designed specifically for Web3.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+        {
+            icon: <Shield className="w-5 h-5" />,
+            title: "Trusted Ecosystem",
+            description: "Work with quality publishers and transparent pricing.",
+            gradient: "from-text-primary/5 via-text-primary/10 to-transparent",
+        },
+    ];
+
+    const useCases = [
+        "Launching a new crypto project",
+        "Promoting blockchain startups",
+        "Marketing NFT collections",
+        "Growing DeFi platforms",
+        "Promoting trading platforms",
+        "Building brand authority",
+    ];
+
+    const niches = [
+        "Finance & Investments",
+        "Crypto & Blockchain",
+        "NFT & Metaverse",
+        "Casino & Gambling",
+    ];
+
+    const adFormats = [
+        "Sponsored Articles",
+        "Guest / Organic Articles",
+        "Press Releases",
+        "Project Reviews",
+        "Interviews",
+        "Deep Dive Content",
+        "Listicle Placements",
+        "Link Insertions",
+        "Direct Banner Ads",
+        "Button Ads",
+        "Text Ads",
+        "In-App Ads",
+        "Newsletters",
+        "Podcasts",
+        "TikTok Influencers",
+        "Telegram Influencers",
+        "Twitter Influencers",
+        "YouTube Influencers",
+    ];
+
+    const steps = [
+        {
+            icon: <Store className="w-6 h-6" />,
+            title: "Explore Marketplace",
+            description:
+                "Browse publisher profiles and discover media platforms that match your audience.",
+        },
+        {
+            icon: <Megaphone className="w-6 h-6" />,
+            title: "Choose Advertising Format",
+            description:
+                "Select sponsored articles, banners, influencer campaigns or custom packages.",
+        },
+        {
+            icon: <Rocket className="w-6 h-6" />,
+            title: "Launch Campaign",
+            description:
+                "Promote your project and reach targeted crypto audiences worldwide.",
+        },
+    ];
 
     return (
         <div
-            className="min-h-screen p-6"
-            style={{
-                backgroundColor: "var(--background)",
-                color: "var(--text-primary)",
-            }}
+            ref={containerRef}
+            className="min-h-screen bg-background text-text-primary relative overflow-hidden"
         >
-            <div className="max-w-[1600px] mx-auto">
+            {/* Hexagonal pattern background (subtle, using theme color) */}
+            <div
+                className="absolute inset-0 opacity-[0.5] pointer-events-none"
+                style={{
+                    backgroundImage: `
+            linear-gradient(60deg, var(--text-primary) 1px, transparent 1px),
+            linear-gradient(-60deg, var(--text-primary) 1px, transparent 1px)
+          `,
+                    backgroundSize: "40px 35px",
+                }}
+            />
+
+
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10 max-w-7xl">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
-                        <h1
-                            className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent"
-                        >
-                            Welcome back, {authedUser.email || "Advertiser"}
-                        </h1>
-                        <p className="mt-1 flex items-center gap-1 opacity-70">
-                            <Activity className="w-4 h-4" />
-                            Here's what's happening with your campaigns
-                        </p>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16 lg:mb-24"
+                >
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-text-primary/10 bg-background/50 backdrop-blur-sm mb-6">
+                        <Sparkles className="w-4 h-4 text-text-primary/60" />
+                        <span className="text-sm font-medium text-text-primary/80">
+                            Marketplace Live
+                        </span>
                     </div>
 
-                    {/* Date Filter  style={{ borderColor: "rgba(0,0,0,0.1)", backgroundColor: "var(--bg-secondary)" }}*/}
-                    <div className="flex gap-2 rounded-xl p-1 border bg-secondary/40">
-                        {filters.map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setActiveFilter(f)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeFilter === f
-                                    ? "bg-amber-500 text-white shadow-md"
-                                    : "hover:bg-black/5"
-                                    }`}
-                                style={activeFilter === f ? {} : { color: "var(--text-primary)" }}
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+                        Advertise With{" "}
+                        <span className="text-text-primary opacity-80">TheCartel AI</span>
+                    </h1>
+
+                    <p className="text-lg sm:text-xl text-text-primary/60 max-w-2xl mx-auto leading-relaxed">
+                        Connect with crypto media outlets, publishers, and influencers.
+                        Launch marketing campaigns that reach real Web3 audiences.
+                    </p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex flex-wrap justify-center gap-4 mt-10"
+                    >
+                        <a
+                            href="#contact"
+                            className="group px-8 py-3 bg-text-primary/10 rounded-full text-text-primary font-semibold hover:bg-text-primary/20 transition-all duration-300 hover:scale-105 border border-text-primary/10"
+                        >
+                            Start Campaign
+                            <ArrowRight className="inline ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <a
+                            href="/marketplace"
+                            className="px-8 py-3 border border-text-primary/20 rounded-full text-text-primary/80 font-semibold hover:bg-text-primary/10 transition-all duration-300"
+                        >
+                            Explore Marketplace
+                        </a>
+                    </motion.div>
+                </motion.div>
+
+                {/* Features */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 mb-20 lg:mb-28">
+                    {features.map((feature, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            whileHover={{ y: -5, scale: 1.02 }}
+                            className="group relative rounded-2xl border border-text-primary/10 bg-background/50 backdrop-blur-sm p-6 hover:bg-text-primary/5 transition-all duration-300"
+                        >
+                            {/* Gradient overlay on hover using theme */}
+                            <div
+                                className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
+                            />
+                            <div className="relative z-10 flex gap-4">
+                                <div className="p-3 bg-text-primary/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                    {feature.icon}
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-lg mb-2">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-sm text-text-primary/60 leading-relaxed">
+                                        {feature.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Marketplace Teaser */}
+                <motion.div
+                    id="marketplace"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-20 lg:mb-28"
+                >
+                    <div className="inline-flex items-center justify-center p-4 bg-text-primary/10 rounded-full mb-6">
+                        <Store className="w-8 h-8 text-text-primary/80" />
+                    </div>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                        Explore Our Publisher Marketplace
+                    </h2>
+                    <p className="text-text-primary/60 max-w-xl mx-auto text-lg">
+                        Discover publishers, compare advertising options and choose the
+                        best platforms to promote your project.
+                    </p>
+                </motion.div>
+
+                {/* Use Cases */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-20 lg:mb-28">
+                    {useCases.map((item, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            whileHover={{ scale: 1.02 }}
+                            className="flex items-center gap-3 rounded-xl border border-text-primary/10 bg-background/50 p-4 hover:bg-text-primary/5 transition-all"
+                        >
+                            <CheckCircle className="w-5 h-5 text-text-primary/60 flex-shrink-0" />
+                            <span className="text-text-primary/80">{item}</span>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Niches */}
+                <div className="text-center mb-20 lg:mb-28">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-8">
+                        Industries We Cover
+                    </h2>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        {niches.map((n, i) => (
+                            <div
+                                key={i}
+                                className="px-6 py-3 rounded-full border border-text-primary/10 bg-background/50 backdrop-blur-sm text-text-primary/80 hover:bg-text-primary/5 hover:scale-105 transition-all cursor-default"
                             >
-                                {f}
-                            </button>
+                                {n}
+                            </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Key Insights Banner */}
-                <div
-                    className="border-l-4 border-amber-500 rounded-xl p-4 mb-8 bg-secondary/40"
+                {/* Ad Formats */}
+                <div className="mb-20 lg:mb-28">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10">
+                        Advertising Formats
+                    </h2>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
+                        {adFormats.map((item, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                transition={{ delay: i * 0.02 }}
+                                whileHover={{ scale: 1.05 }}
+                                className="rounded-lg border border-text-primary/10 bg-background/50 backdrop-blur-sm p-3 text-center text-text-primary/70 hover:bg-text-primary/5 hover:text-text-primary transition-all"
+                            >
+                                {item}
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Workflow Steps */}
+                <div className="mb-20 lg:mb-28">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10">
+                        Launch Campaign in 3 Steps
+                    </h2>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {steps.map((step, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                whileHover={{ y: -5 }}
+                                className="relative rounded-2xl border border-text-primary/10 bg-background/50 backdrop-blur-sm p-6 overflow-hidden group"
+                            >
+                                {/* Step number background */}
+                                <div className="absolute -right-4 -top-4 text-8xl font-bold text-text-primary/5 select-none">
+                                    {i + 1}
+                                </div>
+
+                                <div className="relative z-10">
+                                    <div className="p-3 bg-text-primary/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
+                                        {step.icon}
+                                    </div>
+                                    <h3 className="font-semibold text-xl mb-2">{step.title}</h3>
+                                    <p className="text-text-primary/60 text-sm leading-relaxed">
+                                        {step.description}
+                                    </p>
+                                </div>
+
+                                {/* Glow effect */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-text-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Contact */}
+                <motion.div
+                    id="contact"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center rounded-3xl border border-text-primary/10 bg-background/50 backdrop-blur-sm p-10 lg:p-16 max-w-3xl mx-auto"
                 >
-                    <div className="flex flex-wrap gap-4 items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-amber-100 rounded-lg">
-                                <Zap className="w-5 h-5 text-amber-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-amber-600">Key Insights</p>
-                                <div className="flex flex-wrap gap-3 mt-1">
-                                    {insights.map((insight, idx) => (
-                                        <div key={idx} className="flex items-center gap-1.5 text-xs">
-                                            <insight.icon className={`w-3.5 h-3.5 ${insight.positive ? "text-green-600" : "text-yellow-600"}`} />
-                                            <span className="opacity-80">{insight.text}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-xs opacity-60 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {activeFilter} view
-                        </div>
-                    </div>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4 mb-8">
-                    <MetricCard
-                        title="Ad Spend"
-                        value={`$${stats.totalSpend.toLocaleString()}`}
-                        icon={DollarSign}
-                        trend={{ value: 8.2 }}
-                        tooltip="Total budget spent across all campaigns"
-                        color="amber"
-                    />
-                    <MetricCard
-                        title="Reach"
-                        value={formatNumber(stats.totalImpressions)}
-                        icon={Eye}
-                        trend={{ value: 12.5 }}
-                        tooltip="Total ad impressions"
-                        color="blue"
-                    />
-                    <MetricCard
-                        title="Clicks"
-                        value={formatNumber(stats.totalClicks)}
-                        icon={MousePointerClick}
-                        trend={{ value: 5.3 }}
-                        tooltip="Total clicks received"
-                        color="green"
-                    />
-                    <MetricCard
-                        title="CTR"
-                        value={`${stats.ctr.toFixed(2)}%`}
-                        icon={Percent}
-                        trend={{ value: 0.8 }}
-                        tooltip="Click-through rate = Clicks / Impressions"
-                        color="purple"
-                    />
-                    <MetricCard
-                        title="CPC"
-                        value={`$${stats.cpc.toFixed(2)}`}
-                        icon={TrendingUp}
-                        trend={{ value: -2.1, positive: true }}
-                        tooltip="Cost per click"
-                        color="cyan"
-                    />
-                    <MetricCard
-                        title="eCPM"
-                        value={`$${stats.ecpm.toFixed(2)}`}
-                        icon={DollarSign}
-                        tooltip="Effective cost per 1000 impressions"
-                        color="orange"
-                    />
-                    <MetricCard
-                        title="Conversions"
-                        value={stats.totalConversions}
-                        icon={Target}
-                        trend={{ value: 18.4 }}
-                        tooltip="Total conversions (purchases/signups)"
-                        color="emerald"
-                    />
-                    <MetricCard
-                        title="Conversion Rate"
-                        value={`${stats.conversionRate.toFixed(2)}%`}
-                        icon={Percent}
-                        tooltip="Conversions / Clicks"
-                        color="teal"
-                    />
-                    <MetricCard
-                        title="ROAS"
-                        value={`${stats.roas.toFixed(0)}%`}
-                        icon={TrendingUp}
-                        trend={{ value: 15.2 }}
-                        tooltip="Return on ad spend = Revenue / Spend"
-                        color="amber"
-                    />
-                    <MetricCard
-                        title="ROI"
-                        value={`${stats.roi.toFixed(0)}%`}
-                        icon={ArrowUpRight}
-                        tooltip="Return on investment"
-                        color="green"
-                    />
-                </div>
-
-                {/* Charts Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="lg:col-span-2 rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="flex justify-between items-center mb-4">
-                            <div>
-                                <p className="text-sm font-medium">Performance Trend</p>
-                                <p className="text-xs opacity-60">Last 7 days • Impressions vs Clicks</p>
-                            </div>
-                            <div className="flex gap-3 text-xs">
-                                <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"></div> Clicks</span>
-                                <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Impressions</span>
-                            </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height={280}>
-                            <LineChart data={weeklyTrendData}>
-                                <XAxis dataKey="name" stroke="#888" />
-                                <YAxis yAxisId="left" stroke="#888" />
-                                <YAxis yAxisId="right" orientation="right" stroke="#888" />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }}
-                                    labelStyle={{ color: "#333" }}
-                                />
-                                <Line yAxisId="left" type="monotone" dataKey="clicks" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                                <Line yAxisId="right" type="monotone" dataKey="impressions" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                    <div className="inline-flex items-center justify-center p-4 bg-text-primary/10 rounded-full mb-6">
+                        <Mail className="w-8 h-8 text-text-primary/80" />
                     </div>
 
-                    <div className="rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="mb-4">
-                            <p className="text-sm font-medium">Device Breakdown</p>
-                            <p className="text-xs opacity-60">Where your audience engages</p>
-                        </div>
-                        <ResponsiveContainer width="100%" height={220}>
-                            <PieChart>
-                                <Pie
-                                    data={deviceData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={50}
-                                    outerRadius={80}
-                                    paddingAngle={2}
-                                    dataKey="value"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    labelLine={false}
-                                >
-                                    {deviceData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => `${value}%`} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex justify-center gap-4 mt-2 text-xs opacity-70">
-                            {deviceData.map(d => (
-                                <div key={d.name} className="flex items-center gap-1">
-                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }}></div>
-                                    {d.name}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                        Start Your Campaign
+                    </h2>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div className="rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="mb-4">
-                            <p className="text-sm font-medium">Clicks by Day</p>
-                            <p className="text-xs opacity-60">Bar chart distribution</p>
-                        </div>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={weeklyTrendData}>
-                                <XAxis dataKey="name" stroke="#888" />
-                                <YAxis stroke="#888" />
-                                <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd" }} />
-                                <Bar dataKey="clicks" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <p className="text-text-primary/60 mb-8 text-lg">
+                        Ready to promote your project? Contact us to start advertising.
+                    </p>
 
-                    <div className="rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="mb-4">
-                            <p className="text-sm font-medium">Conversion Trend</p>
-                            <p className="text-xs opacity-60">Daily conversions last week</p>
-                        </div>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <AreaChart data={weeklyTrendData}>
-                                <XAxis dataKey="name" stroke="#888" />
-                                <YAxis stroke="#888" />
-                                <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd" }} />
-                                <Area type="monotone" dataKey="conversions" stroke="#10b981" fill="#10b98120" fillOpacity={0.3} />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                        <a
+                            href="mailto:thecartel.ai@samdigitalsolutions.digital"
+                            className="group px-8 py-4 bg-text-primary/10 rounded-full text-text-primary font-semibold hover:bg-text-primary/20 transition-all duration-300 hover:scale-105 border border-text-primary/10"
+                        >
+                            thecartel.ai@samdigitalsolutions.digital
+                            <ArrowRight className="inline ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </a>
 
-                {/* Campaign Table + Top Ads */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="flex justify-between items-center mb-4">
-                            <p className="text-sm font-medium">Campaign Performance</p>
-                            <button className="text-xs text-amber-600 hover:text-amber-700 transition">View All →</button>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead className="border-b opacity-60" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                                    <tr>
-                                        <th className="text-left py-2">Campaign</th>
-                                        <th className="text-right">Spend</th>
-                                        <th className="text-right">Clicks</th>
-                                        <th className="text-right">Conv.</th>
-                                        <th className="text-right">CTR</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
-                                    {userCampaigns.map((c) => {
-                                        const ctr = (c.clicks / c.impressions) * 100;
-                                        return (
-                                            <tr key={c.id} className="hover:bg-black/5 transition">
-                                                <td className="py-3 font-medium">
-                                                    {c.name}
-                                                    <span
-                                                        className={`ml-2 text-xs px-1.5 py-0.5 rounded ${c.status === "active"
-                                                            ? "bg-green-100 text-green-700"
-                                                            : "bg-yellow-100 text-yellow-700"
-                                                            }`}
-                                                    >
-                                                        {c.status}
-                                                    </span>
-                                                </td>
-                                                <td className="text-right">${c.spend.toLocaleString()}</td>
-                                                <td className="text-right">{c.clicks.toLocaleString()}</td>
-                                                <td className="text-right">{c.conversions || 0}</td>
-                                                <td className="text-right text-amber-600">{ctr.toFixed(2)}%</td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <a
+                            href="https://t.me/thecoin_cartel"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-8 py-4 border border-text-primary/20 rounded-full text-text-primary/80 font-semibold hover:bg-text-primary/10 transition-all duration-300"
+                        >
+                            Telegram
+                        </a>
                     </div>
-
-                    <div className="rounded-2xl border p-4 bg-secondary/40" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                        <div className="mb-4">
-                            <p className="text-sm font-medium">Top Performing Ads</p>
-                            <p className="text-xs opacity-60">Highest click volume this period</p>
-                        </div>
-                        <div className="space-y-3">
-                            {topAds.map((ad, idx) => (
-                                <div
-                                    key={idx}
-                                    className="flex items-center justify-between p-3 rounded-xl border"
-                                    style={{ backgroundColor: "var(--background)", borderColor: "rgba(0,0,0,0.05)" }}
-                                >
-                                    <div>
-                                        <p className="text-sm font-medium">{ad.headline}</p>
-                                        <div className="flex gap-3 mt-1 text-xs opacity-70">
-                                            <span>{ad.clicks.toLocaleString()} clicks</span>
-                                            <span>CTR: {ad.ctr}%</span>
-                                        </div>
-                                    </div>
-                                    <div className="bg-amber-100 px-2 py-1 rounded-lg text-amber-700 text-xs font-semibold">
-                                        #{idx + 1}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <button className="w-full mt-4 text-center text-xs text-amber-600 hover:text-amber-700 transition py-2 border-t pt-3" style={{ borderColor: "rgba(0,0,0,0.1)" }}>
-                            View All Creative Performance →
-                        </button>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-8 text-center text-xs opacity-60 flex items-center justify-center gap-2">
-                    <Info className="w-3 h-3" />
-                    Data updated in real-time • Last sync: {new Date().toLocaleTimeString()}
-                </div>
+                </motion.div>
             </div>
+
+            <style jsx>{`
+        @keyframes pulseConnection {
+          0%,
+          100% {
+            opacity: 0.05;
+          }
+          50% {
+            opacity: 0.2;
+          }
+        }
+      `}</style>
         </div>
     );
 }

@@ -18,17 +18,96 @@ import {
     RefreshCw
 } from "lucide-react"
 
+interface CryptoPrice {
+    symbol: string;
+    name: string;
+    price: string;
+    change: string;
+    trend: "up" | "down";
+}
+
 const LiveCryptoPricePage = () => {
     const containerRef = useRef<HTMLDivElement>(null)
     const tickerRef = useRef<HTMLDivElement>(null)
-    const [simulatedPrices, setSimulatedPrices] = useState([
-        { symbol: "BTC", name: "Bitcoin", price: "64,832.50", change: "+2.45%", trend: "up" },
-        { symbol: "ETH", name: "Ethereum", price: "3,542.80", change: "+1.23%", trend: "up" },
-        { symbol: "SOL", name: "Solana", price: "142.65", change: "+5.67%", trend: "up" },
-        { symbol: "ADA", name: "Cardano", price: "0.4825", change: "-0.85%", trend: "down" },
-        { symbol: "DOT", name: "Polkadot", price: "6.89", change: "-1.23%", trend: "down" },
-        { symbol: "XRP", name: "Ripple", price: "0.5234", change: "+0.45%", trend: "up" },
+    const [cryptoPrices, setCryptoPrices] = useState<CryptoPrice[]>([
+        { symbol: "BTC", name: "Bitcoin", price: "Loading...", change: "0.00%", trend: "up" },
+        { symbol: "ETH", name: "Ethereum", price: "Loading...", change: "0.00%", trend: "up" },
+        { symbol: "SOL", name: "Solana", price: "Loading...", change: "0.00%", trend: "up" },
+        { symbol: "ADA", name: "Cardano", price: "Loading...", change: "0.00%", trend: "down" },
+        { symbol: "DOT", name: "Polkadot", price: "Loading...", change: "0.00%", trend: "down" },
+        { symbol: "XRP", name: "Ripple", price: "Loading...", change: "0.00%", trend: "up" },
     ])
+    const [isLoading, setIsLoading] = useState(true)
+    const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+
+    // Fetch real crypto prices from CoinGecko API
+    const fetchCryptoPrices = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/market-data/v1/prices/')
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+
+            const data = await response.json()
+            if (data.prices) {
+                // Transform API data to our format
+                const transformedPrices = Object.entries(data.prices).map(([symbol, priceData]: [string, any]) => {
+                    const coinNameMap: { [key: string]: string } = {
+                        'bitcoin': 'Bitcoin',
+                        'ethereum': 'Ethereum',
+                        'solana': 'Solana',
+                        'cardano': 'Cardano',
+                        'polkadot': 'Polkadot',
+                        'ripple': 'Ripple',
+                        'binancecoin': 'BNB',
+                        'matic-network': 'Polygon',
+                        'litecoin': 'Litecoin',
+                        'avalanche-2': 'Avalanche',
+                        'chainlink': 'Chainlink',
+                        'algorand': 'Algorand',
+                        'vechain': 'VeChain',
+                        'filecoin': 'Filecoin',
+                        'tron': 'Tron',
+                        'ethereum-classic': 'Ethereum Classic',
+                        'stellar': 'Stellar',
+                        'cosmos': 'Cosmos',
+                        'neo': 'Neo',
+                        'flow': 'Flow',
+                        'internet-computer': 'ICP',
+                        'hedera-hashgraph': 'Hedera',
+                        'near': 'Near',
+                        'fantom': 'Fantom',
+                        'elrond-erd-2': 'Elrond',
+                        'harmony': 'Harmony',
+                        'iota': 'IOTA',
+                        'zcash': 'Zcash'
+                    }
+
+                    const coinName = coinNameMap[symbol.toLowerCase()] || symbol.toUpperCase()
+                    const price = priceData.price ? parseFloat(priceData.price) : 0
+                    const changePercent = priceData.change_percent || 0
+
+                    return {
+                        symbol: symbol.toUpperCase().slice(0, 3), // Take first 3 chars for display
+                        name: coinName,
+                        price: price.toLocaleString('en-US', {
+                            minimumFractionDigits: price < 1 ? 4 : 2,
+                            maximumFractionDigits: price < 1 ? 6 : 2
+                        }),
+                        change: `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`,
+                        trend: changePercent >= 0 ? "up" as const : "down" as const
+                    }
+                }).slice(0, 6) // Take first 6 coins
+
+                setCryptoPrices(transformedPrices)
+                setLastUpdate(new Date())
+                setIsLoading(false)
+            }
+        } catch (error) {
+            console.error('Error fetching crypto prices:', error)
+            // Keep existing data and try again later
+        }
+    }
 
     useEffect(() => {
         // Floating animation for crypto icons
@@ -59,19 +138,13 @@ const LiveCryptoPricePage = () => {
             ease: "power1.inOut"
         })
 
-        // Simulate live price updates
+        // Fetch initial prices
+        fetchCryptoPrices()
+
+        // Set up interval to fetch prices every 60 seconds
         const interval = setInterval(() => {
-            setSimulatedPrices(prev =>
-                prev.map(coin => ({
-                    ...coin,
-                    price: (parseFloat(coin.price.replace(/,/g, '')) +
-                        (Math.random() - 0.5) * parseFloat(coin.price.replace(/,/g, '')) * 0.001)
-                        .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }),
-                    change: `${Math.random() > 0.5 ? '+' : ''}${(Math.random() * 5).toFixed(2)}%`,
-                    trend: Math.random() > 0.5 ? "up" : "down"
-                }))
-            )
-        }, 3000)
+            fetchCryptoPrices()
+        }, 60000) // Update every minute
 
         return () => clearInterval(interval)
     }, [])
@@ -116,7 +189,7 @@ const LiveCryptoPricePage = () => {
                 <div ref={tickerRef} className="flex whitespace-nowrap">
                     {[...Array(3)].map((_, i) => (
                         <div key={i} className="flex ticker-item">
-                            {simulatedPrices.map((coin, index) => (
+                            {cryptoPrices.map((coin, index) => (
                                 <div key={`${i}-${index}`} className="flex items-center mx-8">
                                     <span className="font-semibold text-foreground mr-2">{coin.symbol}</span>
                                     <span className="text-muted-foreground mr-4">${coin.price}</span>

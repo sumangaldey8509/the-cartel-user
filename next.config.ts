@@ -10,12 +10,13 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com", // ✅ allow Cloudinary
-      },
-      {
-        protocol: "https",
-        hostname: "samdigitalsolutions.ae"
       }
     ],
+  },
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production' 
+      ? 'https://thecartel.ai' 
+      : 'http://localhost:8080',
   },
 };
 

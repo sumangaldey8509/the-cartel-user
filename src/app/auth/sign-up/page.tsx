@@ -5,12 +5,22 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2, CheckCircle, Eye, EyeOff, Key, Mail, User, Shield, Building2, Smartphone } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import appClient from "@/lib/appClient"
 import { toastLoading, toastUpdate } from "@/app/utils/toast-message"
 
 const Page = () => {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    
+    // Log referral parameters on component mount
+    useEffect(() => {
+        const ref = searchParams.get('ref');
+        const clickId = searchParams.get('clickId');
+        const source = searchParams.get('source');
+        console.log('Signup page - Referral params received:', { ref, clickId, source });
+    }, [searchParams]);
+
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -137,11 +147,27 @@ const Page = () => {
                 registrationType: formik.values.registrationType
             })
 
-            const payload = {
+            const referralCode = searchParams.get('ref');
+            const clickId = searchParams.get('clickId');
+            const source = searchParams.get('source');
+
+            const payload: {
+                email: string;
+                otp: string;
+                registrationType: string;
+                referralCode?: string;
+                clickId?: string;
+                source?: string;
+            } = {
                 email: formik.values.email,
                 otp: otpCode,
-                registrationType: formik.values.registrationType
-            }
+                registrationType: formik.values.registrationType,
+                ...(referralCode && clickId && {
+                    referralCode,
+                    clickId,
+                    source: source || 'direct'
+                })
+            };
 
             const response = await appClient.post("/api/auth/verify-otp", payload)
 

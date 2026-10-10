@@ -40,7 +40,7 @@ const Navbar = () => {
         { label: "Publisher", href: "/become-a-publisher" },
         { label: "News | Blogs", href: "/news-blogs" },
         { label: "NFTs", href: "/nfts" },
-        { label: "Cartel AI", href: "/cartel-ai" },
+        { label: "Cartel AI Chatbot", href: "/cartel-ai" },
         { label: "Live Crypto Price", href: "/live-crypto-price" },
         { label: "Marketplace", href: "/marketplace" },
         { label: "Advertiser", href: "/advertise-with-us" },

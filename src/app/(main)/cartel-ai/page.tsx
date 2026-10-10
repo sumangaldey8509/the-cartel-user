@@ -15,11 +15,33 @@ import {
     Sparkles,
     Cpu,
     Network,
+    Mic,
+    FileText,
+    MessageSquare,
+    Activity,
+    DollarSign,
+    ArrowRight,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/hooks/hooks";
 
 export default function CartelAIComingSoonPage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const router = useRouter();
+    const user = useAppSelector((store) => store.auth.user);
+
+    // Check if user is authenticated
+    const handleButtonClick = () => {
+        if (user) {
+            // User is logged in, redirect to trader-ai-chatbot
+            router.push('/trader-ai-chatbot');
+        } else {
+            // User is not logged in, redirect to signup
+            router.push('/auth/sign-up');
+        }
+    };
 
     // Background particle + beam animation
     useEffect(() => {
@@ -181,8 +203,8 @@ export default function CartelAIComingSoonPage() {
             />
 
             {/* Gradient orbs – now more vibrant */}
-            <div className="fixed top-20 -left-20 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
-            <div className="fixed bottom-20 -right-20 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+            <div className="fixed top-20 -left-20 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-full blur-3xl animate-pulse" />
+            <div className="fixed bottom-20 -right-20 w-96 h-96 bg-gradient-to-r from-blue-600/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl animate-pulse delay-500" />
 
             {/* Main content */}
@@ -192,139 +214,245 @@ export default function CartelAIComingSoonPage() {
                     <div className="flex justify-center">
                         <div className="p-4 rounded-2xl bg-text-primary/10 border border-text-primary/20 relative group">
                             <Brain className="w-8 h-8 md:w-12 md:h-12 relative z-10" />
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl group-hover:blur-2xl transition-all duration-500" />
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-blue-600/20 blur-xl group-hover:blur-2xl transition-all duration-500" />
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <h1 className="text-4xl md:text-7xl font-bold tracking-tight">
-                            Cartel AI
+                            The Trader AI Chatbot
                             <span className="block text-text-primary/80 text-2xl md:text-4xl mt-2">
-                                Intelligence for the New Economy
+                                Intelligence Built for the Future of Finance
                             </span>
                         </h1>
-                        <p className="max-w-2xl mx-auto text-text-primary/60 text-base md:text-lg">
-                            A sophisticated AI assistant engineered for crypto traders,
-                            investors, and Web3 pioneers. Real-time insights, deep research,
-                            and strategic analysis — all in one place.
-                        </p>
-                    </div>
-                </section>
 
-                {/* Key Capabilities - Enhanced feature grid */}
-                <section className="space-y-8">
-                    <div className="text-center space-y-4">
-                        <h2 className="text-3xl md:text-4xl font-bold">
-                            Powered by <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Advanced AI</span>
+                            {/* CTA Button */}
+                            <div className="pt-6">
+                                <button 
+                                    onClick={handleButtonClick}
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <MessageSquare className="w-5 h-5" />
+                                    Try Trader AI Chatbot
+                                    <ArrowRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Key Capabilities - Enhanced feature grid */}
+                    <section className="space-y-8">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl md:text-4xl font-bold">
+                                Core Capabilities
+                            </h2>
+                            <p className="text-text-primary/60 max-w-2xl mx-auto">
+                                Cartel AI combines next-generation language models with real-time market intelligence, enabling faster decisions, deeper insights, and a true competitive edge.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <FeatureCard
+                                icon={<Brain className="w-6 h-6" />}
+                                title="Advanced Retrieval System"
+                                description="Built on vector databases for precise context understanding and intelligent semantic search."
+                            />
+                            <FeatureCard
+                                icon={<Cpu className="w-6 h-6" />}
+                                title="Multi-Model Intelligence"
+                                description="Seamlessly integrates leading AI models to deliver accurate, reliable, and optimized responses."
+                            />
+                            <FeatureCard
+                                icon={<TrendingUp className="w-6 h-6" />}
+                                title="Live Market Intelligence"
+                                description="Access real-time cryptocurrency data, pricing, and insights across global markets."
+                            />
+                            <FeatureCard
+                                icon={<Mic className="w-6 h-6" />}
+                                title="Voice Interaction"
+                                description="Convert speech to actionable insights with multi-language voice recognition and smart command processing."
+                            />
+                            <FeatureCard
+                                icon={<Activity className="w-6 h-6" />}
+                                title="Technical Insights"
+                                description="Leverage advanced indicators, key levels, and AI-driven predictions for smarter trading decisions."
+                            />
+                            <FeatureCard
+                                icon={<FileText className="w-6 h-6" />}
+                                title="Document Intelligence"
+                                description="Upload and analyze documents to extract meaningful, context-aware insights instantly."
+                            />
+                            <FeatureCard
+                                icon={<Globe className="w-6 h-6" />}
+                                title="Global Language Support"
+                                description="Automatically understand and respond in 100+ languages for worldwide accessibility."
+                            />
+                            <FeatureCard
+                                icon={<Database className="w-6 h-6" />}
+                                title="High-Speed Performance"
+                                description="Optimized caching and infrastructure ensure lightning-fast responses at scale."
+                            />
+                            <FeatureCard
+                                icon={<Network className="w-6 h-6" />}
+                                title="Token Intelligence"
+                                description="Analyze tokens and contract data across multiple blockchain networks with precision."
+                            />
+                        </div>
+                    </section>
+
+                    {/* Advanced Features Section */}
+                    <section className="space-y-8">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl md:text-4xl font-bold">
+                                Enterprise-Grade Architecture
+                            </h2>
+                            <p className="text-text-primary/60 max-w-2xl mx-auto">
+                                Designed with robust, scalable technology for professional traders, analysts, and institutions.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10">
+                                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                    <DollarSign className="w-6 h-6 text-green-500" />
+                                    Market Intelligence Engine
+                                </h3>
+                                <ul className="space-y-2 text-text-primary/70">
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Real-time sentiment tracking with Fear & Greed insights</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Identification of trending assets and global movements</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Live tracking of top gainers and losers</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                                        <span>NFT and broader market analytics</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10">
+                                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                    <Zap className="w-6 h-6 text-yellow-500" />
+                                    Smart Processing Layer
+                                </h3>
+                                <ul className="space-y-2 text-text-primary/70">
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Intelligent query understanding and routing</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Token and symbol recognition</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Context-aware response generation</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                                        <span>Confidence scoring with performance optimization</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Use Cases */}
+                    <section className="space-y-8">
+                        <h2 className="text-3xl md:text-4xl font-bold text-center">
+                            One Platform. Endless Opportunities.
                         </h2>
-                        <p className="text-text-primary/60 max-w-2xl mx-auto">
-                            Cartel AI combines cutting-edge language models with real-time market data to give you an edge.
-                        </p>
-                    </div>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            <UseCaseCard
+                                icon={<TrendingUp />}
+                                title="Swing Trading"
+                                description="Identify high-probability entry and exit points using AI-driven technical and on-chain analysis."
+                            />
+                            <UseCaseCard
+                                icon={<Database />}
+                                title="DeFi Research"
+                                description="Evaluate protocols, yields, and risks across lending, decentralized exchanges, and staking ecosystems."
+                            />
+                            <UseCaseCard
+                                icon={<Globe />}
+                                title="Macro Analysis"
+                                description="Understand global economic trends and their impact on digital asset markets."
+                            />
+                        </div>
+                    </section>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <FeatureCard
-                            icon={<TrendingUp className="w-6 h-6" />}
-                            title="Market Intelligence"
-                            description="Live analysis of Bitcoin, altcoins, and emerging trends with sentiment scoring."
-                        />
-                        <FeatureCard
-                            icon={<Zap className="w-6 h-6" />}
-                            title="Trading Strategies"
-                            description="Break down complex setups, backtest ideas, and get risk-managed suggestions."
-                        />
-                        <FeatureCard
-                            icon={<Database className="w-6 h-6" />}
-                            title="On-Chain Analytics"
-                            description="Interpret whale movements, exchange flows, and network fundamentals."
-                        />
-                        <FeatureCard
-                            icon={<ShieldCheck className="w-6 h-6" />}
-                            title="Security First"
-                            description="Isolated, privacy-focused conversations about your trading ideas."
-                        />
-                        <FeatureCard
-                            icon={<Globe className="w-6 h-6" />}
-                            title="Multi-Chain Support"
-                            description="From Bitcoin to Solana, we cover all major L1s and L2s."
-                        />
-                        <FeatureCard
-                            icon={<BarChart3 className="w-6 h-6" />}
-                            title="Portfolio Insights"
-                            description="Connect your wallets for AI-driven portfolio analysis and alerts."
-                        />
-                    </div>
-                </section>
+                    {/* Final CTA Section */}
+                    <section className="text-center space-y-8 py-12">
+                        <div className="p-8 rounded-3xl bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-text-primary/20">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                                Ready to Upgrade Your Trading Experience?
+                            </h2>
+                            <p className="text-text-primary/70 max-w-2xl mx-auto mb-8">
+                                Unlock the full potential of AI-powered market intelligence and execution support.
+                            </p>
+                            <button 
+                                onClick={handleButtonClick}
+                                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-lg"
+                            >
+                                <MessageSquare className="w-6 h-6" />
+                                Launch Trader AI Chatbot
+                                <ArrowRight className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </section>
 
-                {/* Use Cases */}
-                <section className="space-y-8">
-                    <h2 className="text-3xl md:text-4xl font-bold text-center">
-                        One AI, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Infinite Possibilities</span>
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        <UseCaseCard
-                            icon={<TrendingUp />}
-                            title="Swing Trading"
-                            description="Identify entry/exit points with technical analysis and on-chain confirmation."
-                        />
-                        <UseCaseCard
-                            icon={<Database />}
-                            title="DeFi Research"
-                            description="Evaluate protocols, yields, and risks across lending, DEXes, and restaking."
-                        />
-                        <UseCaseCard
-                            icon={<Globe />}
-                            title="Macro Analysis"
-                            description="Understand how global economics affect crypto markets and position accordingly."
-                        />
-                    </div>
-                </section>
+                    {/* Footer */}
+                    <footer className="text-center text-xs text-text-primary/40 border-t border-text-primary/10 pt-8">
+                        {new Date().getFullYear()} Cartel AI. All rights reserved.
+                    </footer>
+                </div>
+            </main>
+        );
+    }
 
-                {/* Footer */}
-                <footer className="text-center text-xs text-text-primary/40 border-t border-text-primary/10 pt-8">
-                    © {new Date().getFullYear()} Cartel AI. All rights reserved.
-                </footer>
+    function FeatureCard({
+        icon,
+        title,
+        description,
+    }: {
+        icon: React.ReactNode;
+        title: string;
+        description: string;
+    }) {
+        return (
+            <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10 hover:border-text-primary/20 transition-all hover:scale-105 duration-300 group">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center mb-4 group-hover:from-blue-500/30 group-hover:to-blue-600/30 transition">
+                    {icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{title}</h3>
+                <p className="text-text-primary/60 text-sm">{description}</p>
             </div>
-        </main>
-    );
-}
+        );
+    }
 
-function FeatureCard({
-    icon,
-    title,
-    description,
-}: {
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-}) {
-    return (
-        <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10 hover:border-text-primary/20 transition-all hover:scale-105 duration-300 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-4 group-hover:from-blue-500/30 group-hover:to-purple-500/30 transition">
-                {icon}
+    function UseCaseCard({
+        icon,
+        title,
+        description,
+    }: {
+        icon: React.ReactNode;
+        title: string;
+        description: string;
+    }) {
+        return (
+            <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10">
+                <div className="w-12 h-12 rounded-full bg-text-primary/10 flex items-center justify-center mb-4">
+                    {icon}
+                </div>
+                <h4 className="text-lg font-semibold mb-2">{title}</h4>
+                <p className="text-text-primary/60 text-sm">{description}</p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">{title}</h3>
-            <p className="text-text-primary/60 text-sm">{description}</p>
-        </div>
-    );
-}
-
-function UseCaseCard({
-    icon,
-    title,
-    description,
-}: {
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-}) {
-    return (
-        <div className="p-6 rounded-2xl bg-text-primary/5 border border-text-primary/10">
-            <div className="w-12 h-12 rounded-full bg-text-primary/10 flex items-center justify-center mb-4">
-                {icon}
-            </div>
-            <h4 className="text-lg font-semibold mb-2">{title}</h4>
-            <p className="text-text-primary/60 text-sm">{description}</p>
-        </div>
-    );
-}
+        );
+    }
